@@ -55,4 +55,4 @@ The third and probably the most important of the three algorithms is the forward
 
 See Also
 --------
-`Check this link <http://www.python.org/>`_ to view the more detailed tutorial.
+`Check this link <https://drive.google.com/file/d/0B51S7y4fFTS2bnNLcnllc1dpdVE/view?usp=sharing>`_ to view the more detailed tutorial.
