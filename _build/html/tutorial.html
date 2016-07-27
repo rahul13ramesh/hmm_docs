@@ -1,0 +1,263 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>2. Tutorial &mdash; Hidden Markov Model 0.3 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Hidden Markov Model 0.3 documentation" href="index.html"/>
+        <link rel="next" title="3. Usage" href="functions.html"/>
+        <link rel="prev" title="1. Introduction" href="introduction.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Hidden Markov Model
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">2.1. Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-definitions">2.2. Basic Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#forward-backward-probability">2.3. Forward/Backward Probability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#forward-algorithm">2.4. Forward Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#viterbi-algorithm">2.5. Viterbi Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#forward-backward-algorithm">2.6. Forward-Backward Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">2.7. See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">3. Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">4. Example</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Hidden Markov Model</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>2. Tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/tutorial.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tutorial">
+<h1>2. Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>2.1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>A Hidden Markov model is a Markov chain for which the states are not explicitly observable .We instead make indirect observations about the state by events which result from those hidden states .Since these observables are not sufficient/complete to describe the state, we associate a probability with each of the observable coming from a particular state . In other words, if the probability falls to either 1 or 0,it reduces to a Markov model.</p>
+<p><strong>1st order Markov assumption</strong> :The probability of occurrence of an event  at time &#8216;t&#8217; depends only on the observation at time &#8216;t-1&#8217; and not on the events that happened before &#8216;t-1&#8217;. In other words, the observations O1,O2,...Ot-1 do not impact the observation Ot. Hidden Markov models work on this assumption.The initial probability array, transition array and observation/emission array can completely define a HMM.</p>
+</div>
+<div class="section" id="basic-definitions">
+<h2>2.2. Basic Definitions<a class="headerlink" href="#basic-definitions" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><em>O : { O1, O2 , …. OT }</em> : Sequence of observations</li>
+<li><em>Q : {Q1 , Q2 , …. QT }</em> : Sequence of corresponding hidden states</li>
+<li><em>S : {S1 , S2, ……, Sn }</em> : Set of unique states in the Hidden Markov model</li>
+<li><em>M : {M1 , M2, ……, Mn }</em> : Set of unique observations in the Hidden Markov model</li>
+<li><em>n</em> : Number of hidden states in the model</li>
+<li><em>m</em> : Number of unique observations in the model</li>
+<li><em>T</em> : Transition matrix</li>
+<li><em>E</em> : Emission matrix</li>
+<li><em>Pi</em>: Initial/ Start probability</li>
+<li><em>Alpha</em> : Forward probability values</li>
+<li><em>Beta</em> : backward probability values</li>
+</ul>
+</div>
+<div class="section" id="forward-backward-probability">
+<h2>2.3. Forward/Backward Probability<a class="headerlink" href="#forward-backward-probability" title="Permalink to this headline">¶</a></h2>
+<p>Given an observation sequence O={O1 , O2,.... OT}, the forward probability Alpha[i,t] is the probability for the sequence O0, O1,...,Ot to end in the state S[i] after &#8216;t&#8217; stages or at time &#8216;t&#8217;.</p>
+<blockquote>
+<div><em>Alpha(i) = P(Qt= Si , O1, O2,...,OT )</em></div></blockquote>
+<p>Given an observation sequence O={O0 , O1,.... OT}, the backward probability Beta(i) for a state Siat time t is the probability for the sequence Ot+1, Ot+2,...,Ot is observed given the state is Si at time &#8216;t&#8217;.</p>
+<blockquote>
+<div><em>Beta(i) = P(Ot+1, Ot+2,...,OT | Qt= Si )</em></div></blockquote>
+</div>
+<div class="section" id="forward-algorithm">
+<h2>2.4. Forward Algorithm<a class="headerlink" href="#forward-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>The forward algorithm gives us the probability of an observed sequence in the HMM. So why do we need to find the probability of an observed sequence? This type of problem occurs in speech recognition where a large number of Markov models are used, and each one modelling a particular word. Each utterance of a word, will now give us a set of observation variables.</p>
+<p>Hence we will use the Markov model that has the highest probability of this observation sequence. The Forward algorithm is also an important sub-routine of the forward-backward algorithm. The algorithm works by calculating Alpha over various &#8216;t&#8217;. The sum of alpha for all states for time = &#8216;T&#8217;</p>
+</div>
+<div class="section" id="viterbi-algorithm">
+<h2>2.5. Viterbi Algorithm<a class="headerlink" href="#viterbi-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>Viterbi algorithm is used to find out the most likely sequence of hidden states that can generate  the given set of observations.  For example, in speech recognition, the acoustic signal is treated as the observed sequence of events, and a string of text is considered to be the &#8220;hidden cause&#8221; of the acoustic signal. The Viterbi algorithm finds the most likely string of text given the acoustic signal.</p>
+<p>So, what we essentially do is in each step of algorithm, we calculate the probabilities of landing up in another state from any present state. We compare transition probabilities between states. We choose whichever is higher and move on.</p>
+</div>
+<div class="section" id="forward-backward-algorithm">
+<h2>2.6. Forward-Backward Algorithm<a class="headerlink" href="#forward-backward-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>The third and probably the most important of the three algorithms is the forward backward algorithm. Often, the emission, transition and start probabilities are not known. This algorithms aims to find the best model parameters based on the principles of expectation maximization. The algorithm works iteratively and in each iteration, the model parameters are updated, such that the probability of occurrence of a set of observations increase.</p>
+</div>
+<div class="section" id="see-also">
+<h2>2.7. See Also<a class="headerlink" href="#see-also" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://www.python.org/">Check this link</a> to view the more detailed tutorial.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="functions.html" class="btn btn-neutral float-right" title="3. Usage" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="introduction.html" class="btn btn-neutral" title="1. Introduction" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Rahul Ramesh.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.3',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

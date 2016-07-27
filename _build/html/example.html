@@ -1,0 +1,346 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>4. Example &mdash; Hidden Markov Model 0.3 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Hidden Markov Model 0.3 documentation" href="index.html"/>
+        <link rel="prev" title="3. Usage" href="functions.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Hidden Markov Model
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">2. Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">3. Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">4. Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#parameter-intialization">4.1. Parameter Intialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#forward-algorithm">4.2. Forward Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#viterbi-algorithm">4.3. Viterbi Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#baum-welch-algorithm">4.4. Baum-welch Algorithm</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Hidden Markov Model</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>4. Example</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/example.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="example">
+<h1>4. Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h1>
+<p>This notebook illustrates the usage of the functions in this package,
+for a discrete hidden markov model. In the example below, the HMM has
+two states &#8216;s&#8217; and &#8216;t&#8217;. There are two possible observation which are &#8216;A&#8217;
+and &#8216;B&#8217;. The start probabilities, emission probabilities and transition
+probabilities are initialized as below. There are two observation
+sequences &#8216;obs1&#8217; and &#8216;obs2&#8217;. The variable &#8216;quantities_observations&#8217;
+indicates the number of times, the sequences obs1 and obs2 are seen.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Import required Libraries</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">hidden_markov</span> <span class="k">import</span> <span class="n">hmm</span>
+</pre></div>
+</div>
+<div class="section" id="parameter-intialization">
+<h2>4.1. Parameter Intialization<a class="headerlink" href="#parameter-intialization" title="Permalink to this headline">¶</a></h2>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># ====Initializing Parameters ====</span>
+
+<span class="c1"># States</span>
+<span class="n">states</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">)</span>
+
+<span class="c1"># list of possible observations</span>
+<span class="n">possible_observation</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="s1">&#39;B&#39;</span> <span class="p">)</span>
+
+<span class="c1"># The observations that we observe and feed to the model</span>
+<span class="n">obs1</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span><span class="s1">&#39;B&#39;</span><span class="p">,</span><span class="s1">&#39;A&#39;</span><span class="p">)</span>
+<span class="n">obs2</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="s1">&#39;B&#39;</span><span class="p">)</span>
+
+<span class="c1"># Number of observation sequece 1 and observation sequence 2</span>
+<span class="n">quantities_observations</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
+
+<span class="n">observation_tuple</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">observation_tuple</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="p">[</span><span class="n">obs1</span><span class="p">,</span><span class="n">obs2</span><span class="p">]</span> <span class="p">)</span>
+
+<span class="c1"># Input parameters as Numpy matrices</span>
+<span class="n">start_probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span> <span class="s1">&#39;0.5 0.5 &#39;</span><span class="p">)</span>
+<span class="n">transition_probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="s1">&#39;0.6 0.4 ;  0.3 0.7 &#39;</span><span class="p">)</span>
+<span class="n">emission_probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span> <span class="s1">&#39;0.3 0.7 ; 0.4 0.6 &#39;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>A class object called &#8216;test&#8217; is initialized with parameters. Note that
+the parameters are mandatory and default arguments do not exist.
+Additionally, the start probabilities, transition probabilities and
+emission probabilites are all numpy matrices. The observations and
+states are both tuples and the observation_tuples variable is a list of
+observations.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">test</span> <span class="o">=</span> <span class="n">hmm</span><span class="p">(</span><span class="n">states</span><span class="p">,</span><span class="n">possible_observation</span><span class="p">,</span><span class="n">start_probability</span><span class="p">,</span><span class="n">transition_probability</span><span class="p">,</span><span class="n">emission_probability</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="forward-algorithm">
+<h2>4.2. Forward Algorithm<a class="headerlink" href="#forward-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>The forward algorithm find the probability of occurence of an
+observation sequence. The function inputs an observation sequence and
+returns the probability. The transition, start and emission
+probabilities used, are the same as those specified in the class object
+definition.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1">#Forward Algorithm Results on &#39;obs1&#39;</span>
+<span class="n">test</span><span class="o">.</span><span class="n">forward_algo</span><span class="p">(</span><span class="n">obs1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">0.051533999999999996</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="viterbi-algorithm">
+<h2>4.3. Viterbi Algorithm<a class="headerlink" href="#viterbi-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>The Viterbi algorithm finds the most probable sequence of states for a
+given sequence of observations. The function inputs an observation
+sequence and returns the most probable sequence of states.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1">#Output of the Viterbi algorithm</span>
+<span class="n">test</span><span class="o">.</span><span class="n">viterbi</span><span class="p">(</span><span class="n">obs1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="baum-welch-algorithm">
+<h2>4.4. Baum-welch Algorithm<a class="headerlink" href="#baum-welch-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>Using the principles of expectation maximization, the Baum-algorithm
+finds the emission, start and transition probabilities that represent a
+list of observation sequences. We use log-probability in order to
+prevent an overflow error. The function inputs as parameters, a set of
+observation sequences, the number of times each observation sequence
+occurs and the number of iterations. The function then returns the final
+emission, start and transition probabilities.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">prob</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">observation_tuple</span><span class="p">,</span> <span class="n">quantities_observations</span><span class="p">)</span>
+<span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;probability of sequence with original parameters : </span><span class="si">%f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">prob</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">probability</span> <span class="n">of</span> <span class="n">sequence</span> <span class="k">with</span> <span class="n">original</span> <span class="n">parameters</span> <span class="p">:</span> <span class="o">-</span><span class="mf">67.920122</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1">#Sequence on which Baum welch algoritm aws applide on</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">observation_tuple</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">quantities_observations</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">)]</span>
+<span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1">#Apply Baum-welch Algorithm</span>
+<span class="n">num_iter</span><span class="o">=</span><span class="mi">1000</span>
+<span class="n">emission</span><span class="p">,</span><span class="n">transition</span><span class="p">,</span><span class="n">start</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">train_hmm</span><span class="p">(</span><span class="n">observation_tuple</span><span class="p">,</span><span class="n">num_iter</span><span class="p">,</span><span class="n">quantities_observations</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1">#Print output after applying the algorithm</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">emission</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[[</span> <span class="mf">0.36193015</span>  <span class="mf">0.63806985</span><span class="p">]</span>
+ <span class="p">[</span> <span class="mf">0.41111482</span>  <span class="mf">0.58888518</span><span class="p">]]</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[[</span> <span class="mf">0.49431308</span>  <span class="mf">0.50568692</span><span class="p">]]</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">transition</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[[</span> <span class="mf">0.58184591</span>  <span class="mf">0.41815409</span><span class="p">]</span>
+ <span class="p">[</span> <span class="mf">0.29789921</span>  <span class="mf">0.70210079</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Notice that the probability of occurence of an observation sequence has
+increased for the new model parameters</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">prob</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">observation_tuple</span><span class="p">,</span> <span class="n">quantities_observations</span><span class="p">)</span>
+<span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;probability of sequence after </span><span class="si">%d</span><span class="s2"> iterations : </span><span class="si">%f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">num_iter</span><span class="p">,</span><span class="n">prob</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">probability</span> <span class="n">of</span> <span class="n">sequence</span> <span class="n">after</span> <span class="mi">1000</span> <span class="n">iterations</span> <span class="p">:</span> <span class="o">-</span><span class="mf">67.356668</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="functions.html" class="btn btn-neutral" title="3. Usage" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Rahul Ramesh.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.3',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

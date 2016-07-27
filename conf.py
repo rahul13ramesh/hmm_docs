@@ -24,6 +24,8 @@ import sphinx_rtd_theme
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+autoclass_content = 'both'
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.

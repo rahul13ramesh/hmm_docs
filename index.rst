@@ -9,10 +9,13 @@ Hidden Markov Model
 Contents:
 
 .. toctree::
+   :maxdepth: 2
    :numbered:
    :caption: Table of Contents
    :name: mastertoc
 
    introduction.rst
-   temp.rst
+   tutorial.rst
+   functions.rst
+   example.rst
  
